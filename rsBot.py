@@ -2,9 +2,11 @@
 import os
 import discord
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+token = os.getenv('DISCORD_TOKEN')
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -23,4 +25,4 @@ async def on_message(message):
     if message.content.startswith('$hello'):
         await message.channel.send('Hello!')
 
-client.run(TOKEN)
+client.run(token, log_handler=handler, log_level=logging.DEBUG)
