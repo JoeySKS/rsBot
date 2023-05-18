@@ -3,7 +3,6 @@ import os
 import discord
 from dotenv import load_dotenv
 import logging
-import basicVoice
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')

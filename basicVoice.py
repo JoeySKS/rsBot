@@ -1,17 +1,13 @@
 #shameless ctrl+c ctrl+v of prewritten scripts from discord.py's api
 import os
 import asyncio
-
 import discord
-import youtube_dl
-
+import yt_dlp as youtube_dl
 from discord.ext import commands
 from dotenv import load_dotenv
-import logging
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -61,6 +57,11 @@ class Music(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    async def test(self, ctx):
+        """Stops and disconnects the bot from voice"""
+        await ctx.test("You are not connected to a voice channel.")
+
+    @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
         """Joins a voice channel"""
         print("join command recieved")
@@ -71,6 +72,7 @@ class Music(commands.Cog):
     @commands.command()
     async def play(self, ctx, *, query):
         """Plays a file from the local filesystem"""
+        print("play command recieved")
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(query))
         ctx.voice_client.play(source, after=lambda e: print(f'Player error: {e}') if e else None)
         await ctx.send(f'Now playing: {query}')
@@ -78,6 +80,7 @@ class Music(commands.Cog):
     @commands.command()
     async def yt(self, ctx, *, url):
         """Plays from a url (almost anything youtube_dl supports)"""
+        print("yt command recieved")
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop)
             ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
@@ -86,6 +89,7 @@ class Music(commands.Cog):
     @commands.command()
     async def stream(self, ctx, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
+        print("stream command recieved")
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
@@ -93,6 +97,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def volume(self, ctx, volume: int):
+        print("volume command recieved")
         """Changes the player's volume"""
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.")
@@ -102,7 +107,7 @@ class Music(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
-
+        print("stop command recieved")
         await ctx.voice_client.disconnect()
 
     @play.before_invoke
@@ -122,8 +127,8 @@ intents = discord.Intents.all()
 intents.message_content = True
 
 bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or("!"),
-    description='Relatively simple music bot example',
+    command_prefix="!",
+    #command_prefix="commands.when_mentioned_or("!")",
     intents=intents,
 )
 
@@ -131,6 +136,12 @@ bot = commands.Bot(
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
+
+@bot.command()
+async def add(ctx, left: int, right: int):
+    """Adds two numbers together."""
+    await ctx.send(left + right)
+
 
 async def main():
     async with bot:
